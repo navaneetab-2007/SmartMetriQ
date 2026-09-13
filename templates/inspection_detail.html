@@ -1,0 +1,177 @@
+{% extends 'base.html' %}
+
+{% block title %}SmartMetriQ | Inspection Details{% endblock %}
+
+{% block content %}
+<section class="dashboard-page">
+  <div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+      <div>
+        <p class="eyebrow mb-1">Inspection Record</p>
+        <h2 class="mb-0">Inspection Details</h2>
+      </div>
+      <div class="d-flex gap-2 flex-wrap">
+        <a href="{{ url_for('history') }}" class="btn btn-outline-primary">Back to History</a>
+        <a href="{{ url_for('generate_report', inspection_id=inspection_id) }}" class="btn btn-primary">Download PDF</a>
+      </div>
+    </div>
+
+    {% if inspection %}
+      <div class="row g-4">
+        <div class="col-lg-5">
+          <div class="metric-card h-100">
+            <span class="metric-label">Inspection ID</span>
+            <p class="metric-value" style="font-size: 1.4rem; color: #0d6efd;">{{ inspection.inspection_id if inspection.inspection_id else inspection.id }}</p>
+            <div class="mt-3">
+              <p><strong>Date:</strong> {{ inspection.date }}</p>
+              <p><strong>Time:</strong> {{ inspection.time or 'N/A' }}</p>
+              <p><strong>Product:</strong> {{ inspection.product }}</p>
+              <p><strong>Detected/Selected Language:</strong> {{ inspection.language_label if inspection.language_label else inspection.language }}</p>
+              <p><strong>Officer:</strong> {{ inspection.inspector }}</p>
+              <p><strong>Score:</strong> {{ inspection.score }} / 100</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-7">
+          <div class="table-card h-100">
+            <h4>Overall Result</h4>
+            {% if inspection.overall_status == 'PASS' or inspection.status == 'COMPLIANT' %}
+              <span class="status-chip status-compliant">🟢 PASS</span>
+              <div class="mt-2"><strong>Compliance Status:</strong> COMPLIANT</div>
+            {% elif inspection.overall_status == 'REVIEW REQUIRED' or inspection.status == 'REVIEW REQUIRED' %}
+              <span class="status-chip status-review">🟡 REVIEW REQUIRED</span>
+              <div class="mt-2"><strong>Compliance Status:</strong> REVIEW REQUIRED</div>
+            {% else %}
+              <span class="status-chip status-violation">🔴 POTENTIAL VIOLATION</span>
+              <div class="mt-2"><strong>Compliance Status:</strong> POTENTIAL VIOLATION</div>
+            {% endif %}
+
+            <p class="mt-3 mb-3"><strong>Summary:</strong> {{ inspection.result_message or inspection.result }}</p>
+            <p>{{ inspection.result_message or 'Automated preliminary compliance screening. Final determination requires verification by an authorized officer.' }}</p>
+            <p class="mb-0"><strong>AI Text Detection:</strong> {% if ai_status.available %}Available{% else %}Not Available{% endif %}</p>
+            <p class="mb-0"><strong>OCR Language:</strong> {{ inspection.language_label if inspection.language_label else inspection.language }}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="row g-4 mt-1">
+        <div class="col-lg-6">
+          <div class="table-card h-100">
+            <h4>Original Scanned Image</h4>
+            {% if inspection.image_path %}
+              <img src="/{{ inspection.image_path }}" class="img-fluid rounded mt-2 mb-3" alt="Original inspection evidence" />
+              <div class="d-flex gap-2 flex-wrap">
+                <a href="/{{ inspection.image_path }}" class="btn btn-sm btn-outline-primary" target="_blank">Zoom</a>
+                <a href="/{{ inspection.image_path }}" class="btn btn-sm btn-primary" target="_blank">View Full Image</a>
+              </div>
+            {% else %}
+              <p class="mb-0">No original image available for this inspection.</p>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="col-lg-6">
+          <div class="table-card h-100">
+            <h4>OCR Result</h4>
+            <p><strong>Detected Language(s):</strong> {{ inspection.language_label if inspection.language_label else inspection.language }}</p>
+            <div class="mt-3 p-3 border rounded bg-light">
+              <pre class="mb-0" style="white-space: pre-wrap; font-family: inherit;">{{ inspection.ocr_text if inspection.ocr_text else 'Text could not be clearly detected. Manual verification required.' }}</pre>
+            </div>
+            <p class="mt-3 mb-0"><strong>Detected Text Regions:</strong> {{ inspection.ai_model_status.get('available', False) and '1 region (AI-ready crop)' or 'Not available — standard OCR' if inspection.ai_model_status else 'Not available — standard OCR' }}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="row g-4 mt-1">
+        <div class="col-lg-6">
+          <div class="table-card h-100">
+            <h4>Extracted Product Information</h4>
+            {% if inspection.extracted_data %}
+              <ul class="feature-list">
+                {% for key, value in inspection.extracted_data.items() %}
+                  {% if value %}
+                    <li><strong>{{ key.replace('_', ' ').title() }}:</strong> {{ value }}</li>
+                  {% endif %}
+                {% endfor %}
+              </ul>
+            {% else %}
+              <p>No structured product information was extracted.</p>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="col-lg-6">
+          <div class="table-card h-100">
+            <h4>Compliance Analysis</h4>
+            {% for rule in inspection.rule_checks %}
+              <div class="mb-3 border-bottom pb-2">
+                <p class="mb-1"><strong>{{ rule.category }}</strong></p>
+                <p class="mb-1"><small>Detected value: {{ rule.detected_value }}</small></p>
+                <p class="mb-1"><small>Status: {{ rule.status }}</small></p>
+                <p class="mb-0"><small>Explanation: {{ rule.explanation }}</small></p>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+
+      <div class="row g-4 mt-1">
+        <div class="col-lg-6">
+          <div class="table-card h-100">
+            <h4>🚨 Problems Found</h4>
+            {% if inspection.problems_found %}
+              <ul class="feature-list">
+                {% for item in inspection.problems_found %}
+                  <li>
+                    <strong>Category:</strong> {{ item.category }}<br>
+                    <strong>What we found:</strong> {{ item.detail }}<br>
+                    <strong>What to do:</strong> {{ item.action }}
+                  </li>
+                {% endfor %}
+              </ul>
+            {% else %}
+              <p class="mb-0">No problems were identified during the preliminary review.</p>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="col-lg-6">
+          <div class="table-card h-100">
+            <h4>🔐 Evidence Integrity</h4>
+            <p><strong>Inspection ID:</strong> {{ inspection.inspection_id if inspection.inspection_id else inspection.id }}</p>
+            <p><strong>Captured:</strong> {{ inspection.date }} {{ inspection.time or '' }}</p>
+            <p><strong>Officer:</strong> {{ inspection.inspector }}</p>
+            <p><strong>SHA-256:</strong></p>
+            <p class="text-break">{{ inspection.evidence_hash }}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="row g-4 mt-1">
+        <div class="col-12">
+          <div class="table-card h-100">
+            <h4>Audit Trail</h4>
+            {% for event in inspection.audit_events %}
+              <div class="mb-3">
+                <p class="mb-1"><strong>✓ {{ event.event_type }}</strong></p>
+                <small class="text-muted">{{ event.timestamp }} | {{ event.user_id or inspection.inspector or 'System' }}</small>
+                {% if event.description %}
+                  <p class="mb-0">{{ event.description }}</p>
+                {% endif %}
+              </div>
+            {% else %}
+              <p class="mb-0">No audit events recorded.</p>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    {% else %}
+      <div class="table-card">
+        <h4>No inspection found</h4>
+        <p class="mb-0">The record with ID {{ inspection_id }} was not found in the current session.</p>
+      </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% block title %}SmartMetriQ | Complaint Detail{% endblock %}
+
+{% block content %}
+<section class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-10">
+      <div class="card shadow-sm">
+        <div class="card-body p-4">
+          <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+            <div>
+              <p class="eyebrow mb-1">Complaint Details</p>
+              <h2 class="mb-0">{{ complaint.complaint_id }}</h2>
+            </div>
+            <span class="badge bg-warning text-dark fs-6">{{ complaint.status }}</span>
+          </div>
+
+          <div class="row g-4">
+            <div class="col-lg-6">
+              <h5>Complaint Information</h5>
+              <p><strong>Product:</strong> {{ complaint.product_name }}</p>
+              <p><strong>Submitted:</strong> {{ complaint.created_at }}</p>
+              <p><strong>Consumer:</strong> {{ complaint.consumer }}</p>
+              <p><strong>Complaint:</strong> {{ complaint.complaint_description }}</p>
+              {% if complaint.compliance_result %}
+              <p><strong>Compliance:</strong> {{ complaint.compliance_result.get('status', 'SUBMITTED') }}</p>
+              {% endif %}
+            </div>
+            <div class="col-lg-6">
+              <h5>Evidence</h5>
+              {% if complaint.image_path %}
+              <img src="{{ url_for('uploaded_file', filename=complaint.image_path.split('/')[-1]) }}" class="img-fluid rounded border mb-3" alt="Complaint evidence" />
+              {% else %}
+              <p class="text-muted mb-0">No image uploaded for this complaint.</p>
+              {% endif %}
+              {% if complaint.evidence_hash %}
+              <p class="small mb-0"><strong>SHA-256:</strong> {{ complaint.evidence_hash }}</p>
+              {% endif %}
+            </div>
+          </div>
+
+          {% if complaint.ocr_result %}
+          <div class="mt-4">
+            <h5>OCR Result</h5>
+            <pre class="bg-light p-3 rounded">{{ complaint.ocr_result }}</pre>
+          </div>
+          {% endif %}
+
+          {% if complaint.extracted_data %}
+          <div class="mt-4">
+            <h5>Extracted Information</h5>
+            <pre class="bg-light p-3 rounded">{{ complaint.extracted_data }}</pre>
+          </div>
+          {% endif %}
+
+          <div class="mt-4">
+            <a href="{{ url_for('consumer_dashboard') }}" class="btn btn-primary">Back to Dashboard</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

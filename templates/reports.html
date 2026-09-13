@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block title %}SmartMetriQ | Reports{% endblock %}
+
+{% block content %}
+<section class="container py-5">
+  <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+    <div>
+      <p class="eyebrow mb-1">Officer Mode</p>
+      <h2 class="mb-0">Reports</h2>
+    </div>
+    <a href="{{ url_for('dashboard') }}" class="btn btn-outline-primary">Back to Dashboard</a>
+  </div>
+
+  <div class="table-card">
+    <div class="table-responsive">
+      <table class="table align-middle">
+        <thead>
+          <tr>
+            <th>Inspection ID</th>
+            <th>Product</th>
+            <th>Date</th>
+            <th>Download</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for inspection in inspections %}
+          <tr>
+            <td>{{ inspection.inspection_id or inspection.id }}</td>
+            <td>{{ inspection.product }}</td>
+            <td>{{ inspection.date }}</td>
+            <td><a href="{{ url_for('generate_report', inspection_id=inspection.inspection_id or inspection.id) }}" class="btn btn-sm btn-primary">Generate PDF</a></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+{% endblock %}

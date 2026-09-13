@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block title %}SmartMetriQ | Audit Trail{% endblock %}
+
+{% block content %}
+<section class="container py-5">
+  <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+    <div>
+      <p class="eyebrow mb-1">Officer Mode</p>
+      <h2 class="mb-0">Audit Trail</h2>
+    </div>
+    <a href="{{ url_for('dashboard') }}" class="btn btn-outline-primary">Back to Dashboard</a>
+  </div>
+
+  <div class="table-card">
+    {% for inspection in recent_inspections %}
+      <div class="border rounded p-3 mb-3">
+        <h5>{{ inspection.inspection_id or inspection.id }}</h5>
+        {% for event in inspection.audit_events %}
+          <div class="small mb-2">
+            <strong>{{ event.event_type }}</strong> — {{ event.description }}
+            <div class="text-muted">{{ event.timestamp }}</div>
+          </div>
+        {% else %}
+          <p class="mb-0 text-muted">No audit events recorded.</p>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="mb-0 text-muted">No inspection records available.</p>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

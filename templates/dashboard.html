@@ -1,0 +1,201 @@
+{% extends 'base.html' %}
+
+{% block title %}SmartMetriQ | Dashboard{% endblock %}
+
+{% block content %}
+<section class="dashboard-page">
+  <div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+      <div>
+        <p class="eyebrow mb-1">Inspection Dashboard</p>
+        <h2 class="mb-0">Compliance Overview</h2>
+      </div>
+      <a href="{{ url_for('scanner') }}" class="btn btn-primary">New Inspection</a>
+    </div>
+
+    <div class="row g-4">
+      <div class="col-sm-6 col-lg-3">
+        <div class="metric-card">
+          <span class="metric-label">Total Inspections</span>
+          <p class="metric-value" style="color: #0d6efd;">{{ stats.total }}</p>
+        </div>
+      </div>
+
+      <div class="col-sm-6 col-lg-3">
+        <div class="metric-card">
+          <span class="metric-label">Physical Inspections</span>
+          <p class="metric-value" style="color: #0d6efd;">{{ stats.physical }}</p>
+        </div>
+      </div>
+
+      <div class="col-sm-6 col-lg-3">
+        <div class="metric-card">
+          <span class="metric-label">E-Commerce Inspections</span>
+          <p class="metric-value" style="color: #6f42c1;">{{ stats.ecommerce }}</p>
+        </div>
+      </div>
+
+      <div class="col-sm-6 col-lg-3">
+        <div class="metric-card">
+          <span class="metric-label">Consumer Complaints</span>
+          <p class="metric-value" style="color: #0dcaf0;">{{ stats.complaints }}</p>
+        </div>
+      </div>
+
+      <div class="col-sm-6 col-lg-3">
+        <div class="metric-card">
+          <span class="metric-label">Passed</span>
+          <p class="metric-value" style="color: #198754;">{{ stats.compliant }}</p>
+        </div>
+      </div>
+
+      <div class="col-sm-6 col-lg-3">
+        <div class="metric-card">
+          <span class="metric-label">Review Required</span>
+          <p class="metric-value" style="color: #ffc107;">{{ stats.review }}</p>
+        </div>
+      </div>
+
+      <div class="col-sm-6 col-lg-3">
+        <div class="metric-card">
+          <span class="metric-label">Potential Issues</span>
+          <p class="metric-value" style="color: #dc3545;">{{ stats.violations }}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="row g-4 mt-1">
+      <div class="col-12">
+        <div class="table-card">
+          <h4>Languages Scanned</h4>
+          <div class="d-flex flex-wrap gap-2 mt-3">
+            {% for language in stats.languages %}
+              <span class="status-chip status-compliant">{{ language }}</span>
+            {% else %}
+              <span class="status-chip status-review">English</span>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row g-4 mt-1">
+      <div class="col-12">
+        <div class="table-card">
+          <h4>AI Model Status</h4>
+          <div class="mt-3">
+            <p class="mb-1"><strong>Status:</strong> {% if ai_status.available %}Available{% else %}Model not trained yet{% endif %}</p>
+            <p class="mb-1"><strong>Dataset:</strong> {{ ai_status.dataset }}</p>
+            <p class="mb-1"><strong>Model Version:</strong> {{ ai_status.model_version }}</p>
+            <p class="mb-1"><strong>Training Date:</strong> {{ ai_status.training_date }}</p>
+            <p class="mb-1"><strong>Precision:</strong> {{ ai_status.precision if ai_status.precision is not none else 'N/A' }}</p>
+            <p class="mb-1"><strong>Recall:</strong> {{ ai_status.recall if ai_status.recall is not none else 'N/A' }}</p>
+            <p class="mb-1"><strong>F1 Score:</strong> {{ ai_status.f1 if ai_status.f1 is not none else 'N/A' }}</p>
+            <p class="mb-0"><strong>mAP:</strong> {{ ai_status.mAP if ai_status.mAP is not none else 'N/A' }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row g-4 mt-1">
+      <div class="col-12">
+        <div class="table-card">
+          <h4>Common Problems</h4>
+          <div class="d-flex flex-wrap gap-2 mt-3">
+            {% for item in recent_inspections[:10] %}
+              {% set issue_label = (item.violation_display[0].category if item.violation_display else item.issue_category if item.issue_category else 'Other Issue') %}
+              <span class="status-chip status-violation">{{ issue_label }}</span>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row g-4">
+      <div class="col-lg-6">
+        <div class="chart-card">
+          <h4>Common Problems</h4>
+          <canvas id="violationChart" height="180"></canvas>
+        </div>
+      </div>
+
+      <div class="col-lg-6">
+        <div class="table-card">
+          <h4>Recent Scanned Products</h4>
+          <div class="table-responsive mt-3">
+            <table class="table align-middle">
+              <thead>
+                <tr>
+                  <th>Inspection ID</th>
+                  <th>Product Name</th>
+                  <th>Date &amp; Time</th>
+                  <th>Language</th>
+                  <th>Compliance Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for item in recent_inspections %}
+                <tr>
+                  <td>{{ item.inspection_id if item.inspection_id else item.id }}</td>
+                  <td>{{ item.product }}</td>
+                  <td>{{ item.date }}{% if item.time %} {{ item.time }}{% endif %}</td>
+                  <td>{{ item.language_label if item.language_label else item.language if item.language else 'English' }}</td>
+                  <td>
+                    {% if item.status == 'COMPLIANT' %}
+                      <span class="status-chip status-compliant">🟢 PASS</span>
+                    {% elif item.status == 'REVIEW REQUIRED' %}
+                      <span class="status-chip status-review">🟡 REVIEW</span>
+                    {% else %}
+                      <span class="status-chip status-violation">🔴 FAIL</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    <a href="{{ url_for('inspection_detail', inspection_id=item.inspection_id if item.inspection_id else item.id) }}" class="btn btn-sm btn-outline-primary">
+                      View Analysis
+                    </a>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  const ctx = document.getElementById('violationChart');
+  const chartData = {{ chart_data | tojson }};
+
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['Missing Information', 'MRP Problem', 'Quantity Problem', 'Date Problem', 'Manufacturer Details'],
+      datasets: [{
+        label: 'Common Problems',
+        data: chartData,
+        backgroundColor: ['#0d6efd', '#198754', '#ffc107', '#fd7e14', '#dc3545'],
+        borderRadius: 8
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false }
+      },
+      scales: {
+        y: {
+          beginAtZero: true
+        }
+      }
+    }
+  });
+</script>
+{% endblock %}

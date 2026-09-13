@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+
+{% block title %}SmartMetriQ | Scanner{% endblock %}
+
+{% block content %}
+<section class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-10">
+      <div class="scanner-panel card-shadow">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4">
+          <div>
+            <p class="eyebrow mb-1">Inspection Workflow</p>
+            <h2 class="mb-0">Product Scanner</h2>
+          </div>
+          <div class="d-flex gap-2 flex-wrap mt-3 mt-md-0">
+            <button id="startCameraBtn" class="btn btn-primary">Start Camera</button>
+            <button id="captureBtn" class="btn btn-outline-primary" disabled>Capture Image</button>
+            <button id="retakeBtn" class="btn btn-outline-secondary" hidden>Retake</button>
+          </div>
+        </div>
+
+        <div class="row g-4">
+          <div class="col-lg-7">
+            <div class="camera-box">
+              <video id="cameraStream" autoplay playsinline muted></video>
+              <canvas id="capturedCanvas" hidden></canvas>
+              <div id="cameraPlaceholder" class="camera-placeholder">
+                Camera preview will appear here.
+              </div>
+            </div>
+          </div>
+
+          <div class="col-lg-5">
+            <div class="upload-box h-100">
+              <h4>Product Images</h4>
+              <p class="text-muted small mb-3">
+                Capture front, back, side, or label close-up images for review.
+              </p>
+
+              <div class="mb-3">
+                <label class="form-label">Image Type</label>
+                <select class="form-select" id="imageType">
+                  <option value="front">Front</option>
+                  <option value="back">Back</option>
+                  <option value="side">Side</option>
+                  <option value="label_close_up">Label close-up</option>
+                </select>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">Language</label>
+                <select class="form-select" id="languageSelect">
+                  <option value="eng">English</option>
+                  <option value="hin">Hindi</option>
+                  <option value="kan">Kannada</option>
+                  <option value="eng+hin">English + Hindi</option>
+                  <option value="eng+kan">English + Kannada</option>
+                  <option value="hin+kan">Hindi + Kannada</option>
+                  <option value="eng+hin+kan">English + Hindi + Kannada</option>
+                </select>
+              </div>
+
+              <div class="mb-3 border rounded p-3 bg-light">
+                <strong>AI Model:</strong>
+                {% if ai_status.available %}
+                  Available
+                {% else %}
+                  Not trained — Using standard OCR
+                {% endif %}
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label" for="imageUpload">Upload Image</label>
+                <input class="form-control" type="file" id="imageUpload" accept=".jpg,.jpeg,.png,image/jpeg,image/png" />
+              </div>
+
+              <div class="preview-box mb-3" id="imagePreviewContainer" hidden>
+                <img id="imagePreview" alt="Captured preview" />
+              </div>
+
+              <div class="d-grid gap-2">
+                <button id="submitBtn" class="btn btn-success">Submit for Analysis</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/camera.js') }}"></script>
+{% endblock %}

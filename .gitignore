@@ -1,0 +1,37 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+venv/
+
+# Local data and secrets
+kaggle.json
+.env
+.env.*
+secrets.json
+*.key
+*.pem
+
+# Large downloaded datasets
+/data/raw/
+/data/processed/
+/data/train/
+/data/validation/
+/data/test/
+
+# OS/editor
+.DS_Store
+Thumbs.db
+
+# Model artifacts
+models/*.pt
+models/*.pth
+models/*.keras
+models/*.h5
+models/*.onnx
+models/*.bin
+
+# Logs
+*.log

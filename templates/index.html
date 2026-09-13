@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+
+{% block title %}SmartMetriQ | Home{% endblock %}
+
+{% block content %}
+<section class="hero-section">
+  <div class="container">
+    <div class="row align-items-center min-vh-75 py-5">
+      <div class="col-lg-7">
+        <p class="eyebrow">Legal Metrology Compliance</p>
+        <h1>SmartMetriQ</h1>
+        <h2>AI-Assisted Legal Metrology Compliance Scanner</h2>
+        <p class="lead">
+          Scan packaged commodity labels and automatically check important mandatory declarations.
+        </p>
+
+        <div class="d-flex flex-wrap gap-3 mt-4">
+          <a href="{{ url_for('scanner') }}" class="btn btn-primary btn-lg">Scan Product</a>
+          <a href="{{ url_for('scanner') }}" class="btn btn-outline-light btn-lg">Upload Image</a>
+        </div>
+      </div>
+
+      <div class="col-lg-5">
+        <div class="feature-card card-glow">
+          <h3>Quick Actions</h3>
+          <ul class="feature-list">
+            <li>Scan Product</li>
+            <li>Upload Image</li>
+            <li>Inspection Dashboard</li>
+            <li>Inspection History</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="container section-spacing">
+  <div class="row g-4">
+    <div class="col-md-6 col-lg-3">
+      <div class="info-card h-100">
+        <span class="icon">📦</span>
+        <h4>Label Scan</h4>
+        <p>Capture product packaging and review the mandatory declarations.</p>
+      </div>
+    </div>
+
+    <div class="col-md-6 col-lg-3">
+      <div class="info-card h-100">
+        <span class="icon">🔎</span>
+        <h4>OCR Review</h4>
+        <p>Extract text from labels to support quick compliance review.</p>
+      </div>
+    </div>
+
+    <div class="col-md-6 col-lg-3">
+      <div class="info-card h-100">
+        <span class="icon">✅</span>
+        <h4>Rule Checking</h4>
+        <p>Compare required declarations against a configurable rule set.</p>
+      </div>
+    </div>
+
+    <div class="col-md-6 col-lg-3">
+      <div class="info-card h-100">
+        <span class="icon">📄</span>
+        <h4>Evidence Log</h4>
+        <p>Record inspection details, images, and audit trail information.</p>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

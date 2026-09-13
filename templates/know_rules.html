@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block title %}SmartMetriQ | Know the Rules{% endblock %}
+
+{% block content %}
+<section class="container py-5">
+  <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+    <div>
+      <p class="eyebrow mb-1">Consumer Support</p>
+      <h2 class="mb-0">Know the Rules</h2>
+    </div>
+    <a href="{{ url_for('consumer_dashboard') }}" class="btn btn-outline-primary">Back to My Complaints</a>
+  </div>
+
+  <div class="row g-4">
+    {% for key, rule in rules.items() %}
+    <div class="col-md-6 col-lg-4">
+      <div class="card h-100 shadow-sm">
+        <div class="card-body">
+          <h5 class="card-title">{{ rule.title }}</h5>
+          <p class="card-text">{{ rule.summary }}</p>
+          <p class="small text-muted mb-0"><strong>Reference:</strong> {{ rule.reference }}</p>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}
